@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>List Objects and Buckets</title>
+</head>
+<body>
+    <h2>List of Buckets</h2>
+    <table id="bucket-table">
+        <thead>
+            <tr>
+                <th>Bucket Name</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="bucket-list">
+        </tbody>
+    </table>
+    <h2>Select a Bucket to List Objects</h2>
+
+    <label for="bucket-name">Select a Bucket:</label>
+    <select id="bucket-name">
+    </select>
+    <br>
+
+    <button id="list-objects-button">List Objects</button>
+    <br>
+
+    <h2>Objects in the Selected Bucket:</h2>
+    <ul id="object-list"></ul>
+
+    
+    <div id="object-content">
+        <p>Select an object to view its content.</p>
+    </div>
+    <script>
+        // Function to populate the bucket select options
+        function populateBucketSelect() {
+            fetch('http://localhost:3333/list-buckets')
+                .then(response => response.json())
+                .then(data => {
+                    const bucketSelect = document.getElementById('bucket-name');
+                    bucketSelect.innerHTML = ''; // Clear existing options
+                    data.forEach(bucketName => {
+                        const option = document.createElement('option');
+                        option.value = bucketName;
+                        option.textContent = bucketName;
+                        bucketSelect.appendChild(option);
+                    });
+                })
+                .catch(error => console.error(error));
+        }
+
+        // Function to list objects in the selected bucket
+        function listObjects() {
+            const selectedBucket = document.getElementById('bucket-name').value;
+            fetch(`http://localhost:3333/list-objects/${selectedBucket}`)
+                .then(response => response.json())
+                .then(data => {
+                    const objectList = document.getElementById('object-list');
+                    objectList.innerHTML = ''; // Clear existing object list
+                    data.forEach(objectName => {
+                        const listItem = document.createElement('li');
+                        listItem.textContent = objectName;
+
+                        // Add buttons for download, delete, and getObject
+                        const downloadButton = document.createElement('button');
+                        downloadButton.textContent = 'Download';
+                        downloadButton.addEventListener('click', () => downloadObject(selectedBucket, objectName));
+                        
+                        const deleteButton = document.createElement('button');
+                        deleteButton.textContent = 'Delete';
+                        deleteButton.addEventListener('click', () => deleteObject(selectedBucket, objectName));
+                        
+                        const getObjectButton = document.createElement('button');
+                        getObjectButton.textContent = 'Get Object';
+                        getObjectButton.addEventListener('click', () => getObject(selectedBucket, objectName));
+
+                        listItem.appendChild(downloadButton);
+                        listItem.appendChild(deleteButton);
+                        listItem.appendChild(getObjectButton);
+
+                        objectList.appendChild(listItem);
+                    });
+                })
+                .catch(error => console.error(error));
+        }
+
+        // Function to download an object
+        function downloadObject(bucketName, objectName) {
+            window.location.href = `http://localhost:3333/download-object/${bucketName}/${objectName}`;
+        }
+
+        // Function to delete an object
+        function deleteObject(bucketName, objectName) {
+            // Send a DELETE request to the server to delete the object
+            fetch(`http://localhost:3333/delete-object/${bucketName}/${objectName}`, {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                // Refresh the object list
+                listObjects();
+                // Clear the object content
+                clearObjectContent();
+            })
+            .catch(error => console.error(error));
+        }
+
+        // Function to get the content of an object
+        function getObject(bucketName, objectName) {
+            fetch(`http://localhost:3333/get-object/${bucketName}/${objectName}`)
+                .then(response => response.text())
+                .then(data => {
+                    const objectContent = document.getElementById('object-content');
+                    objectContent.innerHTML = `<h2>Contents of ${objectName}:</h2><pre>${data}</pre>`;
+                })
+                .catch(error => console.error(error));
+        }
+
+        // Function to clear the object content
+        function clearObjectContent() {
+            const objectContent = document.getElementById('object-content');
+            objectContent.innerHTML = '<p>Select an object to view its content.</p>';
+        }
+
+        // Function to populate the bucket table
+        function populateBucketTable() {
+            fetch('http://localhost:3333/list-buckets')
+                .then(response => response.json())
+                .then(data => {
+                    const bucketTable = document.getElementById('bucket-table');
+                    const bucketList = document.getElementById('bucket-list');
+                    bucketList.innerHTML = '';
+                    data.forEach(bucketName => {
+                        const row = bucketTable.insertRow();
+                        const cell1 = row.insertCell(0);
+                        const cell3 = row.insertCell(1);
+
+                        cell1.textContent = bucketName;
+
+
+                        const deleteButton = document.createElement('button');
+                        deleteButton.textContent = 'Delete Bucket';
+                        deleteButton.addEventListener('click', () => deleteBucket(bucketName));
+
+                        cell3.appendChild(deleteButton);
+                    });
+                })
+                .catch(error => console.error(error));
+        }
+
+        // Function to delete a bucket
+        function deleteBucket(bucketName) {
+            // Send a DELETE request to the server to delete the bucket
+            fetch(`http://localhost:3333/delete-bucket/${bucketName}`, {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                location.reload();
+            })
+            .catch(error => console.error(error));
+        }
+
+        // List buckets when the page loads
+        populateBucketSelect();
+        // Populate the bucket table when the page loads
+        populateBucketTable();
+
+        // Add a click event listener to the "List Objects" button
+        document.getElementById('list-objects-button').addEventListener('click', function () {
+            listObjects();
+            // Clear the object content when listing objects
+            clearObjectContent();
+        });
+    </script>
+</body>
+</html>

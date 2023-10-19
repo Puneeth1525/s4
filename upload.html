@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>File Upload</title>
+</head>
+<body>
+    <h2>Choose a Bucket and Upload a File</h2>
+
+    <form id="upload-form" enctype="multipart/form-data">
+        <label for="bucket-name">Select a Bucket:</label>
+        <select id="bucket-name" name="bucketName">
+        </select>
+        <br>
+
+        <label for="file-input">Choose a File:</label>
+        <input type="file" id="file-input" name="file">
+        <br>
+
+        <button type="submit">Upload</button>
+    </form>
+
+    <script>
+        function populateBucketSelect() {
+            fetch('http://localhost:3333/list-buckets')
+                .then(response => response.json())
+                .then(data => {
+                    const bucketSelect = document.getElementById('bucket-name');
+                    bucketSelect.innerHTML = '';
+                    data.forEach(bucketName => {
+                        const option = document.createElement('option');
+                        option.value = bucketName;
+                        option.textContent = bucketName;
+                        bucketSelect.appendChild(option);
+                    });
+                })
+                .catch(error => console.error(error));
+        }
+
+        populateBucketSelect();
+
+        document.getElementById('upload-form').addEventListener('submit', function (event) {
+            event.preventDefault();
+            const selectedBucket = document.getElementById('bucket-name').value;
+            const formData = new FormData();
+
+            formData.append('bucketName', selectedBucket);
+
+            if (document.getElementById('file-input').files.length === 0) {
+                console.error('No file selected.');
+                return;
+            }
+
+            formData.append('file', document.getElementById('file-input').files[0]);
+
+            fetch('http://localhost:3333/upload-object', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => console.log(data))
+            .catch(error => console.error(error));
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Bucket</title>
+</head>
+<body>
+    <h2>Create a New Bucket</h2>
+    <form id="create-bucket-form">
+        <label for="bucket-name">Bucket Name:</label>
+        <input type="text" id="bucket-name" name="bucketName">
+        <button type="submit">Create Bucket</button>
+    </form>
+    <hr>
+
+    <h2>Buckets:</h2>
+    <ul id="bucket-list"></ul>
+
+    <script>
+        // Function to list buckets
+        function listBuckets() {
+            fetch('http://localhost:3333/list-buckets')
+                .then(response => response.json())
+                .then(data => {
+                    const bucketList = document.getElementById('bucket-list');
+                    bucketList.innerHTML = '';
+                    data.forEach(bucketName => {
+                        const listItem = document.createElement('li');
+                        listItem.textContent = bucketName;
+                        bucketList.appendChild(listItem);
+                    });
+                })
+                .catch(error => console.error(error));
+        }
+
+        // Function to create a new bucket
+        function createBucket(bucketName) {
+            fetch('http://localhost:3333/create-bucket', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ bucketName })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data);
+                    listBuckets(); // Refresh the bucket list after creating a new bucket
+                })
+                .catch(error => console.error(error));
+        }
+
+        // List buckets when the page loads
+        listBuckets();
+
+        document.getElementById('create-bucket-form').addEventListener('submit', function (event) {
+            event.preventDefault();
+            const bucketName = document.getElementById('bucket-name').value;
+            createBucket(bucketName);
+        });
+    </script>
+</body>
+</html>
