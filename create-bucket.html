@@ -16,7 +16,6 @@
     <ul id="bucket-list"></ul>
 
     <script>
-        // Function to list buckets
         function listBuckets() {
             fetch('http://localhost:3333/list-buckets')
                 .then(response => response.json())
@@ -32,7 +31,6 @@
                 .catch(error => console.error(error));
         }
 
-        // Function to create a new bucket
         function createBucket(bucketName) {
             fetch('http://localhost:3333/create-bucket', {
                 method: 'POST',
@@ -44,12 +42,11 @@
                 .then(response => response.json())
                 .then(data => {
                     console.log(data);
-                    listBuckets(); // Refresh the bucket list after creating a new bucket
+                    listBuckets();
                 })
                 .catch(error => console.error(error));
         }
 
-        // List buckets when the page loads
         listBuckets();
 
         document.getElementById('create-bucket-form').addEventListener('submit', function (event) {

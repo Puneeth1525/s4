@@ -33,7 +33,6 @@
         <p>Select an object to view its content.</p>
     </div>
     <script>
-        // Function to populate the bucket select options
         function populateBucketSelect() {
             fetch('http://localhost:3333/list-buckets')
                 .then(response => response.json())
@@ -50,7 +49,6 @@
                 .catch(error => console.error(error));
         }
 
-        // Function to list objects in the selected bucket
         function listObjects() {
             const selectedBucket = document.getElementById('bucket-name').value;
             fetch(`http://localhost:3333/list-objects/${selectedBucket}`)
@@ -85,29 +83,23 @@
                 .catch(error => console.error(error));
         }
 
-        // Function to download an object
         function downloadObject(bucketName, objectName) {
             window.location.href = `http://localhost:3333/download-object/${bucketName}/${objectName}`;
         }
 
-        // Function to delete an object
         function deleteObject(bucketName, objectName) {
-            // Send a DELETE request to the server to delete the object
             fetch(`http://localhost:3333/delete-object/${bucketName}/${objectName}`, {
                 method: 'DELETE'
             })
             .then(response => response.json())
             .then(data => {
                 console.log(data);
-                // Refresh the object list
                 listObjects();
-                // Clear the object content
                 clearObjectContent();
             })
             .catch(error => console.error(error));
         }
 
-        // Function to get the content of an object
         function getObject(bucketName, objectName) {
             fetch(`http://localhost:3333/get-object/${bucketName}/${objectName}`)
                 .then(response => response.text())
@@ -118,13 +110,11 @@
                 .catch(error => console.error(error));
         }
 
-        // Function to clear the object content
         function clearObjectContent() {
             const objectContent = document.getElementById('object-content');
             objectContent.innerHTML = '<p>Select an object to view its content.</p>';
         }
 
-        // Function to populate the bucket table
         function populateBucketTable() {
             fetch('http://localhost:3333/list-buckets')
                 .then(response => response.json())
@@ -150,9 +140,7 @@
                 .catch(error => console.error(error));
         }
 
-        // Function to delete a bucket
         function deleteBucket(bucketName) {
-            // Send a DELETE request to the server to delete the bucket
             fetch(`http://localhost:3333/delete-bucket/${bucketName}`, {
                 method: 'DELETE'
             })
@@ -164,15 +152,11 @@
             .catch(error => console.error(error));
         }
 
-        // List buckets when the page loads
         populateBucketSelect();
-        // Populate the bucket table when the page loads
         populateBucketTable();
 
-        // Add a click event listener to the "List Objects" button
         document.getElementById('list-objects-button').addEventListener('click', function () {
             listObjects();
-            // Clear the object content when listing objects
             clearObjectContent();
         });
     </script>
